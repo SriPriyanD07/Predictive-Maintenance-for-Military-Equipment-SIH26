@@ -27,27 +27,15 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from ml.features import build_features
-from ml.sensor_map import CONTRACT_KEYS
+# BASELINE is re-exported, not redefined -- ml/sensor_map.py is the single
+# source of truth. backend/main.py imports it from here.
+from ml.sensor_map import BASELINE, CONTRACT_KEYS  # noqa: F401
 
 log = logging.getLogger(__name__)
 
 RUL_CAP = 125.0
 SENTINEL = (125.0, 100.0, 125.0)   # returned on empty/corrupt input
 DEFAULT_MAE = 25.0                  # band width if metrics.json is unreadable
-
-# Nominal healthy telemetry, in CONTRACT SPACE (median of cycles 1-5 across
-# train_FD001, vibration already rescaled). The backend seeds initial unit
-# state from this, so it must sit in the same distribution the model trained
-# on -- see the scale-mismatch note in the M1 handoff.
-BASELINE = {
-    "core_temp": 642.38,
-    "exhaust_temp": 1587.24,
-    "fan_speed": 521.94,
-    "core_speed": 8.42,
-    "pressure": 1402.92,
-    "vibration": 0.557,
-    "fuel_flow": 553.99,
-}
 
 # ------------------------------------------------------------- singleton ---
 

@@ -10,7 +10,9 @@ near-constant RUL. No exception, no traceback -- just a dead demo. So training
 applies rescale_vibration() too, and train/serve see identical distributions.
 """
 
-import numpy as np
+# NO third-party imports. backend/fallbacks.py imports this module, and that
+# module has to keep working on a machine where the ML stack (numpy, xgboost)
+# was never pip installed -- that is the entire reason fallbacks.py exists.
 
 # ---------------------------------------------------------------- mapping ---
 
@@ -62,11 +64,51 @@ def rescale_vibration(raw_s11):
     if span <= 0:  # degenerate guard; never true for FD001
         return float(VIB_OUT_MIN)
     frac = (raw - VIB_RAW_MIN) / span
-    frac = float(np.clip(frac, 0.0, 1.0))
+    frac = max(0.0, min(1.0, frac))
     return float(VIB_OUT_MIN + frac * (VIB_OUT_MAX - VIB_OUT_MIN))
 
 
 # -------------------------------------------------------------- contract ---
+
+
+# ----------------------------------------------- nominal / degradation ---
+#
+# THE canonical telemetry constants. backend/fallbacks.py and ml/model.py both
+# import these -- nobody hand-writes "realistic-looking" jet engine numbers
+# anywhere else. Values that look physically odd (core_speed ~8.4 rather than
+# thousands of RPM) are correct: SENSOR_MAP gives raw C-MAPSS channels
+# physically-suggestive names, but s15 is a bypass ratio, not an RPM. The model
+# only ever saw these ranges, so anything outside them produces a constant,
+# wrong RUL with no error.
+#
+# All three dicts measured from train_FD001 (see tools/check_skew.py).
+
+# Median of cycles 1-5: a healthy, just-installed unit.
+BASELINE = {
+    "core_temp": 642.38,
+    "exhaust_temp": 1587.24,
+    "fan_speed": 521.94,
+    "core_speed": 8.42,
+    "pressure": 1402.92,
+    "vibration": 0.557,
+    "fuel_flow": 553.99,
+}
+
+# Full observed range per channel; used to normalise deviation from BASELINE.
+SPREAD = {
+    "core_temp": 3.32,
+    "exhaust_temp": 45.87,
+    "fan_speed": 4.69,
+    "core_speed": 0.26,
+    "pressure": 59.24,
+    "vibration": 1.20,
+    "fuel_flow": 6.21,
+}
+
+# Channels whose value FALLS as the unit degrades (mean at RUL>=120 vs RUL<=10).
+# Measured, not assumed: core_speed and pressure both RISE with degradation,
+# and fuel_flow falls -- the reverse of what the channel names suggest.
+DECREASING = {"fan_speed", "fuel_flow"}
 
 
 def to_contract(row):

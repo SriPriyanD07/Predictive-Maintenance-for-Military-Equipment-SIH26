@@ -1,5 +1,6 @@
 import math
 import random
+import sys
 from pathlib import Path
 import pickle
 
@@ -88,26 +89,28 @@ class FallbackSimulator:
 # ml/model.py  (predict_rul -> fallback_predict_rul)
 # ============================================================
 
-BASELINE = {
-    "core_temp": 550.0,
-    "exhaust_temp": 900.0,
-    "fan_speed": 2400.0,
-    "core_speed": 9000.0,
-    "pressure": 14.5,
-    "vibration": 0.3,
-    "fuel_flow": 550.0,
-}
+# Telemetry constants come from ml/sensor_map.py -- the single source of truth.
+# The dicts that used to live here held invented "realistic-looking" jet engine
+# numbers (core_speed 9000, pressure 14.5) chosen before the C-MAPSS contract
+# existed. Five of seven were outside the range the model ever trained on, and
+# the degradation directions were backwards on three, so the fallback heuristic
+# and the model disagreed about which way "worse" is. Do not re-add literals.
+#
+# sensor_map has no third-party imports, so this works even where the ML stack
+# was never installed.
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
-_SPREAD = {
-    "core_temp": 80.0,
-    "exhaust_temp": 150.0,
-    "fan_speed": 200.0,
-    "core_speed": 400.0,
-    "pressure": 3.0,
-    "vibration": 2.5,
-    "fuel_flow": 60.0,
-}
+from ml.sensor_map import (  # noqa: E402
+    BASELINE,
+    CONTRACT_KEYS,
+    DECREASING as _DECREASING,
+    SPREAD as _SPREAD,
+)
 
+# Relative importance per channel in the composite health score. Stays local:
+# this is a heuristic tuning knob, not a property of the data.
 _WEIGHT = {
     "core_temp": 1.0,
     "exhaust_temp": 1.3,
@@ -117,8 +120,6 @@ _WEIGHT = {
     "vibration": 1.3,
     "fuel_flow": 0.9,
 }
-
-_DECREASING = {"fan_speed", "core_speed", "pressure"}
 
 _MODEL = None
 MODEL_LOADED = False
@@ -168,7 +169,9 @@ def _heuristic(window):
 
 
 def _with_model(window):
-    features = [float(window[-1].get(k, BASELINE[k])) for k in BASELINE]
+    # Order from CONTRACT_KEYS, not dict iteration order -- feature column
+    # order must not depend on how a dict happens to be written.
+    features = [float(window[-1].get(k, BASELINE[k])) for k in CONTRACT_KEYS]
     rul = float(_MODEL.predict([features])[0])
     rul = max(0.0, min(125.0, rul))
     low = max(0.0, rul - 12.0)
