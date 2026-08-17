@@ -14,14 +14,23 @@ TELEMETRY_KEYS = (
 )
 
 # unit_id, unit_name, start-cycle offset (cycles already accumulated before tick 0),
-# degradation-rate multiplier (cycles accrued per simulator tick)
+# degradation-rate multiplier (cycles accrued per simulator tick),
+# severity: amplitude of the telemetry excursion, as a multiple of DELTA.
+#
+# Why severity exists: DELTA is the MEAN healthy->failed movement across all 100
+# training engines, so a unit that sweeps exactly BASELINE -> BASELINE+DELTA
+# lands at the average failure condition -- which the model scores at RUL 15.6,
+# just above the 15.0 CRITICAL threshold. Rate alone cannot fix that; it moves a
+# unit faster along a curve that still saturates at the same place. Severity
+# lets the hero unit degrade past the average, the way a genuinely bad engine
+# does, so the demo actually reaches CRITICAL.
 _UNIT_CONFIGS = (
-    ("M-011", "Turbofan Engine 011", 10, 0.5),
-    ("M-014", "Turbofan Engine 014", 40, 0.5),
-    ("M-017", "Turbofan Engine 017", 95, 1.0),
-    ("M-021", "Turbofan Engine 021", 5, 0.5),
-    ("M-023", "Turbofan Engine 023", 130, 0.5),
-    ("M-029", "Turbofan Engine 029", 0, 0.5),
+    ("M-011", "Turbofan Engine 011", 10, 0.5, 0.8),
+    ("M-014", "Turbofan Engine 014", 40, 0.5, 0.9),
+    ("M-017", "Turbofan Engine 017", 95, 1.0, 1.2),   # hero unit
+    ("M-021", "Turbofan Engine 021", 5, 0.5, 0.7),
+    ("M-023", "Turbofan Engine 023", 130, 0.5, 1.1),
+    ("M-029", "Turbofan Engine 029", 0, 0.5, 0.6),
 )
 
 # Degradation curve: logistic, saturates toward but never reaches 1.0, so RUL
@@ -44,8 +53,9 @@ class FallbackSimulator:
         self._tick_index = 0
         self._rng = random.Random(_SEED)
         self.units = [
-            {"unit_id": uid, "unit_name": name, "offset": offset, "rate": rate}
-            for uid, name, offset, rate in _UNIT_CONFIGS
+            {"unit_id": uid, "unit_name": name, "offset": offset, "rate": rate,
+             "severity": severity}
+            for uid, name, offset, rate, severity in _UNIT_CONFIGS
         ]
 
     @property
@@ -71,10 +81,11 @@ class FallbackSimulator:
             # ratio). Correct physics, wrong sensors for this contract: 6 of 7
             # channels landed outside the model's training range, so RUL came
             # back near-constant with no error.
+            severity = u.get("severity", 1.0)
             telemetry = {
                 key: round(
                     BASELINE[key]
-                    + degradation * DELTA[key]
+                    + degradation * severity * DELTA[key]
                     + n(abs(DELTA[key]) * 0.15),
                     4,
                 )
@@ -116,6 +127,8 @@ from ml.sensor_map import (  # noqa: E402
     DECREASING as _DECREASING,
     DELTA,
     SPREAD as _SPREAD,
+    VIB_OUT_MAX,
+    VIB_OUT_MIN,
 )
 
 # Relative importance per channel in the composite health score. Stays local:
@@ -273,8 +286,12 @@ def fallback_decide(rul, window, history):
     try:
         rul_c = max(0.0, min(125.0, float(rul)))
         latest = window[-1] if window else {}
-        vibration = float(latest.get("vibration", 0.3))
-        vib_norm = max(0.0, min(1.0, (vibration - 0.3) / 2.5))
+        # Normalise against the real serving range (VIB_OUT_MIN..VIB_OUT_MAX),
+        # not the old hardcoded 0.3/2.5 which capped vib_norm at 0.44 and so
+        # silently understated 30% of the risk score.
+        vibration = float(latest.get("vibration", BASELINE["vibration"]))
+        _vib_span = VIB_OUT_MAX - VIB_OUT_MIN
+        vib_norm = max(0.0, min(1.0, (vibration - VIB_OUT_MIN) / _vib_span))
         health_index = max(0.0, min(1.0, rul_c / 125.0))
         risk_score = max(0.0, min(1.0, 0.7 * (1.0 - health_index) + 0.3 * vib_norm))
 
