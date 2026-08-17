@@ -1,10 +1,15 @@
 *.pkl
+# Artifacts teammates pull from git rather than retraining. The blanket *.pkl
+# rule above would otherwise swallow the actual M1 deliverable.
 !ml/*.pkl
 mock/scenario_fixed.json
 data/*.csv
 
 .venv/
+venv/
 __pycache__/
 *.pyc
+*.egg-info/
 
+# raw C-MAPSS: too large to share through git, everyone downloads their own
 data/

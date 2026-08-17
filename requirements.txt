@@ -2,3 +2,14 @@ fastapi==0.115.0
 uvicorn[standard]==0.30.6
 pydantic==2.9.2
 requests==2.32.3
+
+# ---- M1 / ML layer ----
+# Pinned deliberately: five people pip install separately, and a pickle written
+# by one xgboost version will not load in another. ml/model.json (native
+# save_model format) is the version-portable fallback if this drifts anyway.
+xgboost==3.4.1
+scikit-learn==1.9.0
+pandas==3.0.3
+numpy==2.3.2
+joblib==1.5.3
+matplotlib==3.11.0
