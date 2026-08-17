@@ -1,4 +1,5 @@
 *.pkl
+!ml/*.pkl
 mock/scenario_fixed.json
 data/*.csv
 
