@@ -1,0 +1,6 @@
+* text=auto
+*.pkl binary
+*.png binary
+*.json text eol=lf
+*.csv text eol=lf
+*.sh text eol=lf
