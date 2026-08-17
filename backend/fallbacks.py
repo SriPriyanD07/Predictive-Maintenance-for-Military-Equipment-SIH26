@@ -63,14 +63,22 @@ class FallbackSimulator:
             cycle = u["offset"] + self._tick_index * u["rate"]
             degradation = _degradation(cycle)
             n = lambda scale: self._rng.uniform(-scale, scale)
+            # Telemetry sweeps BASELINE -> BASELINE+DELTA as the unit degrades,
+            # all from ml/sensor_map.py. These used to be inline literals
+            # (core_speed 9000, pressure 14.5) taken from s8/s9 -- the real
+            # physical speed sensors -- but the frozen contract maps
+            # core_speed->s15 (a bypass ratio) and fan_speed->s12 (a flow
+            # ratio). Correct physics, wrong sensors for this contract: 6 of 7
+            # channels landed outside the model's training range, so RUL came
+            # back near-constant with no error.
             telemetry = {
-                "core_temp": round(550.0 + degradation * 80.0 + n(3.0), 2),
-                "exhaust_temp": round(900.0 + degradation * 150.0 + n(5.0), 2),
-                "fan_speed": round(2400.0 - degradation * 200.0 + n(10.0), 2),
-                "core_speed": round(9000.0 - degradation * 400.0 + n(15.0), 2),
-                "pressure": round(14.5 - degradation * 3.0 + n(0.2), 3),
-                "vibration": round(0.3 + degradation * 2.5 + n(0.1), 3),
-                "fuel_flow": round(550.0 + degradation * 60.0 + n(4.0), 2),
+                key: round(
+                    BASELINE[key]
+                    + degradation * DELTA[key]
+                    + n(abs(DELTA[key]) * 0.15),
+                    4,
+                )
+                for key in CONTRACT_KEYS
             }
             out.append({
                 "unit_id": u["unit_id"],
@@ -106,6 +114,7 @@ from ml.sensor_map import (  # noqa: E402
     BASELINE,
     CONTRACT_KEYS,
     DECREASING as _DECREASING,
+    DELTA,
     SPREAD as _SPREAD,
 )
 

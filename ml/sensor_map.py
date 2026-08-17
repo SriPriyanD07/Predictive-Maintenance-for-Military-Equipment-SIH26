@@ -110,6 +110,20 @@ SPREAD = {
 # and fuel_flow falls -- the reverse of what the channel names suggest.
 DECREASING = {"fan_speed", "fuel_flow"}
 
+# Signed movement from healthy to failed: mean(RUL>=120) -> mean(RUL<=10).
+# Anything generating synthetic telemetry should sweep BASELINE -> BASELINE+DELTA
+# as a unit degrades. Using these keeps generated values inside the range the
+# model was trained on, which is the whole point.
+DELTA = {
+    "core_temp": +1.181,
+    "exhaust_temp": +14.038,
+    "fan_speed": -1.917,
+    "core_speed": +0.094,
+    "pressure": +23.836,
+    "vibration": +0.516,
+    "fuel_flow": -2.258,
+}
+
 
 def to_contract(row):
     """One raw C-MAPSS row -> dict of the 7 contract keys, all float.
