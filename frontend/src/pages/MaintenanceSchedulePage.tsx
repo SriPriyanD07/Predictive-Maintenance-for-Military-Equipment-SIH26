@@ -1,9 +1,10 @@
 // Dispatch view: "who do I service first?" — ranked by urgency (lowest RUL first).
 import { useNavigate } from "react-router-dom";
-import { FLEET } from "../data/mockFleet";
+import { useFleet } from "../hooks/useFleet";
 import { RiskBadge } from "../components/ui/Badge";
 
 export function MaintenanceSchedulePage() {
+  const { vehicles: FLEET } = useFleet();
   const navigate = useNavigate();
   const ranked = [...FLEET]
     .filter((v) => v.risk !== "healthy")

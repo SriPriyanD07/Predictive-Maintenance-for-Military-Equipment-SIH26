@@ -10,7 +10,8 @@ import { AlertsPage } from "./pages/AlertsPage";
 import { MaintenanceSchedulePage } from "./pages/MaintenanceSchedulePage";
 import { SparePartsPage } from "./pages/SparePartsPage";
 import { AlertsProvider } from "./hooks/useAlerts";
-import { FLEET_METRICS } from "./data/mockFleet";
+import { FleetProvider, useFleet } from "./hooks/useFleet";
+import { LiveBadge } from "./components/ui/LiveBadge";
 
 function titleFor(pathname: string): { title: string; subtitle: string } {
   if (pathname === "/") return { title: "Fleet Dashboard", subtitle: "Live predictive maintenance overview" };
@@ -28,9 +29,11 @@ function titleFor(pathname: string): { title: string; subtitle: string } {
 function Shell() {
   const location = useLocation();
   const { title, subtitle } = titleFor(location.pathname);
+  const { fleetMetrics } = useFleet();
 
   return (
-    <DashboardLayout criticalCount={FLEET_METRICS.criticalCount} title={title} subtitle={subtitle}>
+    <DashboardLayout criticalCount={fleetMetrics.criticalCount} title={title} subtitle={subtitle}>
+      <div className="mb-4"><LiveBadge /></div>
       <Routes>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/vehicles" element={<VehiclesPage />} />
@@ -49,9 +52,11 @@ function Shell() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AlertsProvider>
-        <Shell />
-      </AlertsProvider>
+      <FleetProvider>
+        <AlertsProvider>
+          <Shell />
+        </AlertsProvider>
+      </FleetProvider>
     </BrowserRouter>
   );
 }

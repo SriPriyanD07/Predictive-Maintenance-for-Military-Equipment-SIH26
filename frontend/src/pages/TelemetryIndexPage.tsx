@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { FLEET } from "../data/mockFleet";
+import { useFleet } from "../hooks/useFleet";
 import { RiskBadge } from "../components/ui/Badge";
 
 export function TelemetryIndexPage() {
+  const { vehicles: FLEET } = useFleet();
   const navigate = useNavigate();
   return (
     <div className="rounded-xl border border-base-800 bg-base-900 shadow-panel">

@@ -1,7 +1,7 @@
 // Investigation view: the officer drills down here to understand one unit.
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Activity } from "lucide-react";
-import { FLEET } from "../data/mockFleet";
+import { useFleet } from "../hooks/useFleet";
 import { RiskBadge } from "../components/ui/Badge";
 import { ActionBanner } from "../components/ui/ActionBanner";
 import { Checklist } from "../components/ui/Checklist";
@@ -10,6 +10,7 @@ import { Button } from "../components/ui/Button";
 import { RULTrendChart } from "../components/dashboard/RULTrendChart";
 
 export function VehicleDetailsPage() {
+  const { vehicles: FLEET } = useFleet();
   const { id } = useParams();
   const navigate = useNavigate();
   const vehicle = FLEET.find((v) => v.id === id);

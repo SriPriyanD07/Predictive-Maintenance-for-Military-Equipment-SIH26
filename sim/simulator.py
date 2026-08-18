@@ -100,9 +100,15 @@ class Simulator:
         # build_scenario.py's output (original FD001 engine number).
         if "unit_name" in row:
             try:
-                row["unit_name"] = int(row["unit_name"])
+                row["source_engine"] = int(row["unit_name"])
             except (TypeError, ValueError):
-                pass
+                row["source_engine"] = row["unit_name"]
+            # backend/fallbacks.py emits unit_name as a human-readable string
+            # and the frontend renders it directly, so passing the raw FD001
+            # engine number through shows "39" as the vehicle name.
+            uid = str(row.get("unit_id", ""))
+            if uid:
+                row["unit_name"] = f"Turbofan Engine {uid.split('-')[-1]}"
         return row
 
     # -- state ---------------------------------------------------------
@@ -111,6 +117,27 @@ class Simulator:
         """Reset playback to just before the first tick. The next call
         to tick() will return the first tick's readings."""
         self._tick_index = self._min_tick - 1
+
+    @property
+    def units(self) -> list[dict]:
+        """Distinct units in the scenario, in first-appearance order.
+
+        backend/main.py seeds its history/window buffers from this. The data
+        was already in the scenario; it just was not exposed, so the backend
+        raised AttributeError on startup.
+        """
+        seen, out = set(), []
+        for tick in sorted(self._by_tick):
+            for row in self._by_tick[tick]:
+                uid = row["unit_id"]
+                if uid not in seen:
+                    seen.add(uid)
+                    out.append({
+                        "unit_id": uid,
+                        "unit_name": row["unit_name"],
+                        "source_engine": row.get("source_engine"),
+                    })
+        return out
 
     @property
     def tick_index(self) -> int:

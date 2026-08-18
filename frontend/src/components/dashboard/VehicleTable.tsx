@@ -6,7 +6,6 @@ import { RiskBadge } from "../ui/Badge";
 
 type SortKey = "rulCycles" | "healthScore" | "name";
 
-const RISK_ORDER: Record<RiskLevel, number> = { critical: 0, warning: 1, healthy: 2 };
 
 export function VehicleTable({
   vehicles,

@@ -5,15 +5,17 @@ import { RULTrendChart } from "../components/dashboard/RULTrendChart";
 import { CriticalAlertsPanel } from "../components/dashboard/CriticalAlertsPanel";
 import { VehicleTable } from "../components/dashboard/VehicleTable";
 import { RiskBadge } from "../components/ui/Badge";
-import { FLEET, FLEET_METRICS } from "../data/mockFleet";
+import { useFleet } from "../hooks/useFleet";
 import { useAlerts } from "../hooks/useAlerts";
 
 export function DashboardPage() {
+  const { vehicles: FLEET, fleetMetrics: FLEET_METRICS } = useFleet();
   const navigate = useNavigate();
   const { alerts, acknowledgeAlert } = useAlerts();
-  const criticalVehicles = useMemo(() => FLEET.filter((v) => v.risk === "critical"), []);
-  const [featuredId, setFeaturedId] = useState(criticalVehicles[0]?.id ?? FLEET[0].id);
-  const featuredVehicle = FLEET.find((v) => v.id === featuredId) ?? FLEET[0];
+  const criticalVehicles = useMemo(() => FLEET.filter((v) => v.risk === "critical"), [FLEET]);
+  const [featuredId, setFeaturedId] = useState<string>("");
+  const featuredVehicle =
+    FLEET.find((v) => v.id === featuredId) ?? criticalVehicles[0] ?? FLEET[0];
 
   return (
     <div className="space-y-6">

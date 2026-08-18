@@ -1,6 +1,6 @@
 // Model performance view — does NOT duplicate dashboard/alerts content.
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { MODEL_METRICS, FLEET } from "../data/mockFleet";
+import { useFleet } from "../hooks/useFleet";
 
 function MetricTile({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -13,6 +13,7 @@ function MetricTile({ label, value, sub }: { label: string; value: string; sub?:
 }
 
 export function AnalyticsPage() {
+  const { vehicles: FLEET, modelMetrics: MODEL_METRICS } = useFleet();
   // Aggregate predicted-vs-actual RUL across a representative unit for the comparison chart.
   const sample = FLEET.find((v) => v.risk === "critical") ?? FLEET[0];
   const comparisonData = sample.rulHistory.filter((p) => p.actualRul !== null);

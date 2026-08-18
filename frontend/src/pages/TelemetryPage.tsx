@@ -2,7 +2,7 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowDown, ArrowUp, Minus } from "lucide-react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { FLEET } from "../data/mockFleet";
+import { useFleet } from "../hooks/useFleet";
 import { RiskBadge } from "../components/ui/Badge";
 
 function pctChange(curr: number, prev: number) {
@@ -74,6 +74,7 @@ function SensorPanel({
 }
 
 export function TelemetryPage() {
+  const { vehicles: FLEET } = useFleet();
   const { id } = useParams();
   const navigate = useNavigate();
   const vehicle = FLEET.find((v) => v.id === id);
