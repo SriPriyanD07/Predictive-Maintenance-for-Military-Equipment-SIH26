@@ -1,0 +1,10 @@
+{
+  "model": "XGBoost",
+  "dataset": "NASA C-MAPSS FD001",
+  "mae": 13.426,
+  "rmse": 18.297,
+  "n_test": 100,
+  "baseline_mae": 34.83,
+  "lead_time_cycles": 42.0,
+  "trained_at": "2026-08-17T18:29:00Z"
+}

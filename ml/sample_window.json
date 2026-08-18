@@ -1,0 +1,302 @@
+[
+  {
+    "core_temp": 643.18,
+    "exhaust_temp": 1585.17,
+    "fan_speed": 521.23,
+    "core_speed": 8.4808,
+    "pressure": 1409.75,
+    "vibration": 0.5214285714285685,
+    "fuel_flow": 552.31,
+    "cycle": 1
+  },
+  {
+    "core_temp": 642.92,
+    "exhaust_temp": 1585.97,
+    "fan_speed": 521.82,
+    "core_speed": 8.4209,
+    "pressure": 1410.81,
+    "vibration": 0.7499999999999973,
+    "fuel_flow": 552.74,
+    "cycle": 2
+  },
+  {
+    "core_temp": 642.74,
+    "exhaust_temp": 1591.11,
+    "fan_speed": 521.52,
+    "core_speed": 8.4497,
+    "pressure": 1403.29,
+    "vibration": 0.671428571428569,
+    "fuel_flow": 552.79,
+    "cycle": 3
+  },
+  {
+    "core_temp": 642.76,
+    "exhaust_temp": 1592.22,
+    "fan_speed": 521.25,
+    "core_speed": 8.4405,
+    "pressure": 1406.11,
+    "vibration": 0.7928571428571418,
+    "fuel_flow": 552.13,
+    "cycle": 4
+  },
+  {
+    "core_temp": 643.13,
+    "exhaust_temp": 1596.11,
+    "fan_speed": 521.5,
+    "core_speed": 8.4029,
+    "pressure": 1409.34,
+    "vibration": 0.6857142857142855,
+    "fuel_flow": 553.61,
+    "cycle": 5
+  },
+  {
+    "core_temp": 642.55,
+    "exhaust_temp": 1596.3,
+    "fan_speed": 521.07,
+    "core_speed": 8.4505,
+    "pressure": 1418.06,
+    "vibration": 0.6999999999999971,
+    "fuel_flow": 552.32,
+    "cycle": 6
+  },
+  {
+    "core_temp": 642.86,
+    "exhaust_temp": 1586.88,
+    "fan_speed": 521.14,
+    "core_speed": 8.4438,
+    "pressure": 1404.52,
+    "vibration": 0.507142857142857,
+    "fuel_flow": 553.54,
+    "cycle": 7
+  },
+  {
+    "core_temp": 642.75,
+    "exhaust_temp": 1589.06,
+    "fan_speed": 521.9,
+    "core_speed": 8.4281,
+    "pressure": 1407.11,
+    "vibration": 0.5785714285714294,
+    "fuel_flow": 552.97,
+    "cycle": 8
+  },
+  {
+    "core_temp": 643.01,
+    "exhaust_temp": 1594.26,
+    "fan_speed": 521.17,
+    "core_speed": 8.4758,
+    "pressure": 1413.87,
+    "vibration": 0.6857142857142855,
+    "fuel_flow": 552.61,
+    "cycle": 9
+  },
+  {
+    "core_temp": 642.57,
+    "exhaust_temp": 1583.85,
+    "fan_speed": 521.1,
+    "core_speed": 8.4599,
+    "pressure": 1406.7,
+    "vibration": 0.72857142857143,
+    "fuel_flow": 553.56,
+    "cycle": 10
+  },
+  {
+    "core_temp": 642.3,
+    "exhaust_temp": 1589.55,
+    "fan_speed": 521.0,
+    "core_speed": 8.4549,
+    "pressure": 1419.87,
+    "vibration": 0.7999999999999974,
+    "fuel_flow": 554.04,
+    "cycle": 11
+  },
+  {
+    "core_temp": 643.02,
+    "exhaust_temp": 1587.92,
+    "fan_speed": 521.18,
+    "core_speed": 8.4522,
+    "pressure": 1406.39,
+    "vibration": 0.7714285714285694,
+    "fuel_flow": 553.47,
+    "cycle": 12
+  },
+  {
+    "core_temp": 642.46,
+    "exhaust_temp": 1588.36,
+    "fan_speed": 521.36,
+    "core_speed": 8.4268,
+    "pressure": 1407.31,
+    "vibration": 0.5571428571428572,
+    "fuel_flow": 553.57,
+    "cycle": 13
+  },
+  {
+    "core_temp": 642.44,
+    "exhaust_temp": 1588.9,
+    "fan_speed": 521.1,
+    "core_speed": 8.4481,
+    "pressure": 1413.77,
+    "vibration": 0.6857142857142855,
+    "fuel_flow": 553.13,
+    "cycle": 14
+  },
+  {
+    "core_temp": 642.61,
+    "exhaust_temp": 1596.78,
+    "fan_speed": 521.48,
+    "core_speed": 8.4934,
+    "pressure": 1411.97,
+    "vibration": 0.7499999999999973,
+    "fuel_flow": 553.06,
+    "cycle": 15
+  },
+  {
+    "core_temp": 641.82,
+    "exhaust_temp": 1592.93,
+    "fan_speed": 522.08,
+    "core_speed": 8.4631,
+    "pressure": 1410.4,
+    "vibration": 0.7142857142857135,
+    "fuel_flow": 553.15,
+    "cycle": 16
+  },
+  {
+    "core_temp": 642.61,
+    "exhaust_temp": 1592.06,
+    "fan_speed": 521.25,
+    "core_speed": 8.4208,
+    "pressure": 1403.1,
+    "vibration": 0.7499999999999973,
+    "fuel_flow": 553.48,
+    "cycle": 17
+  },
+  {
+    "core_temp": 642.2,
+    "exhaust_temp": 1593.38,
+    "fan_speed": 521.19,
+    "core_speed": 8.4579,
+    "pressure": 1409.63,
+    "vibration": 0.8142857142857141,
+    "fuel_flow": 552.95,
+    "cycle": 18
+  },
+  {
+    "core_temp": 642.32,
+    "exhaust_temp": 1590.23,
+    "fan_speed": 521.0,
+    "core_speed": 8.4433,
+    "pressure": 1406.79,
+    "vibration": 0.7428571428571416,
+    "fuel_flow": 553.75,
+    "cycle": 19
+  },
+  {
+    "core_temp": 643.33,
+    "exhaust_temp": 1590.41,
+    "fan_speed": 521.75,
+    "core_speed": 8.4265,
+    "pressure": 1405.38,
+    "vibration": 0.5999999999999966,
+    "fuel_flow": 553.09,
+    "cycle": 20
+  },
+  {
+    "core_temp": 642.74,
+    "exhaust_temp": 1586.57,
+    "fan_speed": 520.86,
+    "core_speed": 8.4506,
+    "pressure": 1400.16,
+    "vibration": 0.671428571428569,
+    "fuel_flow": 553.73,
+    "cycle": 21
+  },
+  {
+    "core_temp": 642.68,
+    "exhaust_temp": 1589.24,
+    "fan_speed": 521.51,
+    "core_speed": 8.4327,
+    "pressure": 1412.59,
+    "vibration": 0.7357142857142858,
+    "fuel_flow": 553.2,
+    "cycle": 22
+  },
+  {
+    "core_temp": 643.08,
+    "exhaust_temp": 1585.98,
+    "fan_speed": 521.28,
+    "core_speed": 8.4517,
+    "pressure": 1415.98,
+    "vibration": 0.6928571428571413,
+    "fuel_flow": 553.14,
+    "cycle": 23
+  },
+  {
+    "core_temp": 642.92,
+    "exhaust_temp": 1584.01,
+    "fan_speed": 521.63,
+    "core_speed": 8.4348,
+    "pressure": 1406.58,
+    "vibration": 0.6857142857142855,
+    "fuel_flow": 552.85,
+    "cycle": 24
+  },
+  {
+    "core_temp": 642.85,
+    "exhaust_temp": 1585.05,
+    "fan_speed": 521.75,
+    "core_speed": 8.4432,
+    "pressure": 1410.56,
+    "vibration": 0.8285714285714254,
+    "fuel_flow": 553.29,
+    "cycle": 25
+  },
+  {
+    "core_temp": 642.23,
+    "exhaust_temp": 1589.95,
+    "fan_speed": 521.88,
+    "core_speed": 8.4056,
+    "pressure": 1405.69,
+    "vibration": 0.5785714285714294,
+    "fuel_flow": 553.07,
+    "cycle": 26
+  },
+  {
+    "core_temp": 642.83,
+    "exhaust_temp": 1590.91,
+    "fan_speed": 520.65,
+    "core_speed": 8.4211,
+    "pressure": 1413.37,
+    "vibration": 0.7142857142857135,
+    "fuel_flow": 553.4,
+    "cycle": 27
+  },
+  {
+    "core_temp": 642.14,
+    "exhaust_temp": 1584.76,
+    "fan_speed": 520.94,
+    "core_speed": 8.4334,
+    "pressure": 1411.85,
+    "vibration": 0.6142857142857132,
+    "fuel_flow": 553.68,
+    "cycle": 28
+  },
+  {
+    "core_temp": 642.89,
+    "exhaust_temp": 1592.03,
+    "fan_speed": 521.34,
+    "core_speed": 8.4479,
+    "pressure": 1407.7,
+    "vibration": 0.7142857142857135,
+    "fuel_flow": 553.01,
+    "cycle": 29
+  },
+  {
+    "core_temp": 643.08,
+    "exhaust_temp": 1588.55,
+    "fan_speed": 521.26,
+    "core_speed": 8.4222,
+    "pressure": 1400.07,
+    "vibration": 0.72857142857143,
+    "fuel_flow": 552.45,
+    "cycle": 30
+  }
+]

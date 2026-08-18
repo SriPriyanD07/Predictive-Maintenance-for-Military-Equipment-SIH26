@@ -1,5 +1,7 @@
 import math
 import random
+import sys
+from pathlib import Path
 
 # ============================================================
 # sim/simulator.py  (Simulator -> FallbackSimulator)
@@ -11,14 +13,23 @@ TELEMETRY_KEYS = (
 )
 
 # unit_id, unit_name, start-cycle offset (cycles already accumulated before tick 0),
-# degradation-rate multiplier (cycles accrued per simulator tick)
+# degradation-rate multiplier (cycles accrued per simulator tick),
+# severity: amplitude of the telemetry excursion, as a multiple of DELTA.
+#
+# Why severity exists: DELTA is the MEAN healthy->failed movement across all 100
+# training engines, so a unit that sweeps exactly BASELINE -> BASELINE+DELTA
+# lands at the average failure condition -- which the model scores at RUL 15.6,
+# just above the 15.0 CRITICAL threshold. Rate alone cannot fix that; it moves a
+# unit faster along a curve that still saturates at the same place. Severity
+# lets the hero unit degrade past the average, the way a genuinely bad engine
+# does, so the demo actually reaches CRITICAL.
 _UNIT_CONFIGS = (
-    ("M-011", "Turbofan Engine 011", 10, 0.5),
-    ("M-014", "Turbofan Engine 014", 40, 0.5),
-    ("M-017", "Turbofan Engine 017", 95, 1.0),
-    ("M-021", "Turbofan Engine 021", 5, 0.5),
-    ("M-023", "Turbofan Engine 023", 130, 0.5),
-    ("M-029", "Turbofan Engine 029", 0, 0.5),
+    ("M-011", "Turbofan Engine 011", 10, 0.5, 0.8),
+    ("M-014", "Turbofan Engine 014", 40, 0.5, 0.9),
+    ("M-017", "Turbofan Engine 017", 95, 1.0, 1.2),   # hero unit
+    ("M-021", "Turbofan Engine 021", 5, 0.5, 0.7),
+    ("M-023", "Turbofan Engine 023", 130, 0.5, 1.1),
+    ("M-029", "Turbofan Engine 029", 0, 0.5, 0.6),
 )
 
 # Degradation curve: logistic, saturates toward but never reaches 1.0, so RUL
@@ -41,8 +52,9 @@ class FallbackSimulator:
         self._tick_index = 0
         self._rng = random.Random(_SEED)
         self.units = [
-            {"unit_id": uid, "unit_name": name, "offset": offset, "rate": rate}
-            for uid, name, offset, rate in _UNIT_CONFIGS
+            {"unit_id": uid, "unit_name": name, "offset": offset, "rate": rate,
+             "severity": severity}
+            for uid, name, offset, rate, severity in _UNIT_CONFIGS
         ]
 
     @property
@@ -60,14 +72,23 @@ class FallbackSimulator:
             cycle = u["offset"] + self._tick_index * u["rate"]
             degradation = _degradation(cycle)
             n = lambda scale: self._rng.uniform(-scale, scale)
+            # Telemetry sweeps BASELINE -> BASELINE+DELTA as the unit degrades,
+            # all from ml/sensor_map.py. These used to be inline literals
+            # (core_speed 9000, pressure 14.5) taken from s8/s9 -- the real
+            # physical speed sensors -- but the frozen contract maps
+            # core_speed->s15 (a bypass ratio) and fan_speed->s12 (a flow
+            # ratio). Correct physics, wrong sensors for this contract: 6 of 7
+            # channels landed outside the model's training range, so RUL came
+            # back near-constant with no error.
+            severity = u.get("severity", 1.0)
             telemetry = {
-                "core_temp": round(550.0 + degradation * 80.0 + n(3.0), 2),
-                "exhaust_temp": round(900.0 + degradation * 150.0 + n(5.0), 2),
-                "fan_speed": round(2400.0 - degradation * 200.0 + n(10.0), 2),
-                "core_speed": round(9000.0 - degradation * 400.0 + n(15.0), 2),
-                "pressure": round(14.5 - degradation * 3.0 + n(0.2), 3),
-                "vibration": round(0.3 + degradation * 2.5 + n(0.1), 3),
-                "fuel_flow": round(550.0 + degradation * 60.0 + n(4.0), 2),
+                key: round(
+                    BASELINE[key]
+                    + degradation * severity * DELTA[key]
+                    + n(abs(DELTA[key]) * 0.15),
+                    4,
+                )
+                for key in CONTRACT_KEYS
             }
             out.append({
                 "unit_id": u["unit_id"],
@@ -86,26 +107,31 @@ class FallbackSimulator:
 # ml/model.py  (predict_rul -> fallback_predict_rul)
 # ============================================================
 
-BASELINE = {
-    "core_temp": 550.0,
-    "exhaust_temp": 900.0,
-    "fan_speed": 2400.0,
-    "core_speed": 9000.0,
-    "pressure": 14.5,
-    "vibration": 0.3,
-    "fuel_flow": 550.0,
-}
+# Telemetry constants come from ml/sensor_map.py -- the single source of truth.
+# The dicts that used to live here held invented "realistic-looking" jet engine
+# numbers (core_speed 9000, pressure 14.5) chosen before the C-MAPSS contract
+# existed. Five of seven were outside the range the model ever trained on, and
+# the degradation directions were backwards on three, so the fallback heuristic
+# and the model disagreed about which way "worse" is. Do not re-add literals.
+#
+# sensor_map has no third-party imports, so this works even where the ML stack
+# was never installed.
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
-_SPREAD = {
-    "core_temp": 80.0,
-    "exhaust_temp": 150.0,
-    "fan_speed": 200.0,
-    "core_speed": 400.0,
-    "pressure": 3.0,
-    "vibration": 2.5,
-    "fuel_flow": 60.0,
-}
+from ml.sensor_map import (  # noqa: E402
+    BASELINE,
+    CONTRACT_KEYS,
+    DECREASING as _DECREASING,
+    DELTA,
+    SPREAD as _SPREAD,
+    VIB_OUT_MAX,
+    VIB_OUT_MIN,
+)
 
+# Relative importance per channel in the composite health score. Stays local:
+# this is a heuristic tuning knob, not a property of the data.
 _WEIGHT = {
     "core_temp": 1.0,
     "exhaust_temp": 1.3,
@@ -116,9 +142,8 @@ _WEIGHT = {
     "fuel_flow": 0.9,
 }
 
-_DECREASING = {"fan_speed", "core_speed", "pressure"}
-
 MODEL_LOADED = False
+
 
 
 def _heuristic(window):
@@ -144,6 +169,7 @@ def _heuristic(window):
     low = max(0.0, rul - band)
     high = min(125.0, rul + band)
     return (round(rul, 2), round(low, 2), round(high, 2))
+
 
 
 def fallback_predict_rul(window):
@@ -226,8 +252,12 @@ def fallback_decide(rul, window, history):
     try:
         rul_c = max(0.0, min(125.0, float(rul)))
         latest = window[-1] if window else {}
-        vibration = float(latest.get("vibration", 0.3))
-        vib_norm = max(0.0, min(1.0, (vibration - 0.3) / 2.5))
+        # Normalise against the real serving range (VIB_OUT_MIN..VIB_OUT_MAX),
+        # not the old hardcoded 0.3/2.5 which capped vib_norm at 0.44 and so
+        # silently understated 30% of the risk score.
+        vibration = float(latest.get("vibration", BASELINE["vibration"]))
+        _vib_span = VIB_OUT_MAX - VIB_OUT_MIN
+        vib_norm = max(0.0, min(1.0, (vibration - VIB_OUT_MIN) / _vib_span))
         health_index = max(0.0, min(1.0, rul_c / 125.0))
         risk_score = max(0.0, min(1.0, 0.7 * (1.0 - health_index) + 0.3 * vib_norm))
 

@@ -1,8 +1,18 @@
-*.pkl
-mock/scenario_fixed.json
-data/*.csv
-
-.venv/
+# python
 __pycache__/
 *.pyc
-.claude/ 
+*.egg-info/
+.venv/
+venv/
+
+# ML artifacts: the pickle IS shared through git so teammates need not retrain
+*.pkl
+!ml/*.pkl
+
+# raw C-MAPSS: too large for git, everyone downloads their own copy.
+# Leading slash matters: a bare "data/" also matches frontend/src/data/.
+/data/
+mock/scenario_fixed.json
+
+# editor / local tooling
+.claude/
