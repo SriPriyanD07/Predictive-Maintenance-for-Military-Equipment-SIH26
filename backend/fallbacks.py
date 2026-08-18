@@ -1,7 +1,5 @@
 import math
 import random
-from pathlib import Path
-import pickle
 
 # ============================================================
 # sim/simulator.py  (Simulator -> FallbackSimulator)
@@ -120,26 +118,7 @@ _WEIGHT = {
 
 _DECREASING = {"fan_speed", "core_speed", "pressure"}
 
-_MODEL = None
 MODEL_LOADED = False
-
-
-def load_model(path="ml/model.pkl"):
-    global _MODEL, MODEL_LOADED
-    try:
-        p = Path(path)
-        if not p.exists():
-            _MODEL = None
-            MODEL_LOADED = False
-            return None
-        with open(p, "rb") as f:
-            _MODEL = pickle.load(f)
-        MODEL_LOADED = True
-        return _MODEL
-    except Exception:
-        _MODEL = None
-        MODEL_LOADED = False
-        return None
 
 
 def _heuristic(window):
@@ -167,24 +146,10 @@ def _heuristic(window):
     return (round(rul, 2), round(low, 2), round(high, 2))
 
 
-def _with_model(window):
-    features = [float(window[-1].get(k, BASELINE[k])) for k in BASELINE]
-    rul = float(_MODEL.predict([features])[0])
-    rul = max(0.0, min(125.0, rul))
-    low = max(0.0, rul - 12.0)
-    high = min(125.0, rul + 12.0)
-    return (round(rul, 2), round(low, 2), round(high, 2))
-
-
 def fallback_predict_rul(window):
     try:
         if not window:
             return (125.0, 110.0, 125.0)
-        if _MODEL is not None:
-            try:
-                return _with_model(window)
-            except Exception:
-                pass
         return _heuristic(window)
     except Exception:
         return (60.0, 40.0, 80.0)
